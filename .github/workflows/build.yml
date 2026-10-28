@@ -564,20 +564,18 @@ jobs:
           if [[ "${KERNEL_BRANCH}" == *"_r"* ]] || git ls-remote --exit-code --tags "$COMMON_URL" "refs/tags/${KERNEL_BRANCH}" >/dev/null 2>&1; then
             IS_TAG=true
           fi
-          if [ "$IS_TAG" = true ] then;
+          
+          if [ "$IS_TAG" = true ]; then
             MANIFEST_BRANCH="$KERNEL_BRANCH%%_r*"
-            retry_command repo init \
-              -u https://android.googlesource.com/kernel/manifest \
-              -b "common-${MANIFEST_BRANCH}" \
-              --depth=1 \
-              --no-clone-bundle
           else
-            retry_command repo init \
-              -u https://android.googlesource.com/kernel/manifest \
-              -b "common-${KERNEL_BRANCH}" \
-              --depth=1 \
-              --no-clone-bundle
+            MANIFEST_BRANCH="$KERNEL_BRANCH"
           fi
+          
+          retry_command repo init \
+            -u https://android.googlesource.com/kernel/manifest \
+            -b "common-${MANIFEST_BRANCH}" \
+            --depth=1 \
+            --no-clone-bundle
 
           # --- Redirect a retired GKI branch to its deprecated/ head ----------
           # Modified to check if ${KERNEL_BRANCH} represents a tag instead of a branch.

@@ -37,7 +37,7 @@ on:
         type: string
         description: "🕐 Kernel build timestamp: F = current UTC time | custom date string"
         required: false
-        default: "Sun Mar 01 02:03:04 UTC 2026"
+        default: "Wed Jul 15 11:18:49 UTC 2026"
 
       KSU_META:
         type: string
@@ -49,7 +49,7 @@ on:
         type: string
         description: "🏷️ Kernel local version suffix: empty = stock suffix for the selected GKI release | -1 = disabled"
         required: false
-        default: ""
+        default: "6-g242e1a07f878-ab15865446-4k"
 
       SUBLEVEL:
         type: string
@@ -70,6 +70,7 @@ on:
           - android16-6.12-2026-03
           - android16-6.12-2026-06
           - android16-6.12-2026-09
+          - android16-6.12-2026-03_r54
 
       LSM:
         type: boolean
@@ -181,6 +182,7 @@ jobs:
           android16-6.12-2025-09|oneplus15r|macan|sm8845|OnePlus 15R / Ace 6T (6.12.38)|OnePlus15R-Ace6T
           android16-6.12-2025-12|oneplus15|${ALL_CODENAME}|sm8850|${ALL_NAME} (6.12.58)|${ALL_SAFE}
           android16-6.12-2026-03|oneplus15|${ALL_CODENAME}|sm8850|${ALL_NAME} (6.12.69)|${ALL_SAFE}
+          android16-6.12-2026-03_r54|oneplus15|${ALL_CODENAME}|sm8850|${ALL_NAME} (6.12.69)|${ALL_SAFE}
           android16-6.12-2026-06|oneplus15|${ALL_CODENAME}|sm8850|${ALL_NAME} (6.12.81)|${ALL_SAFE}
           android16-6.12-2026-09|oneplus15|${ALL_CODENAME}|sm8850|${ALL_NAME} (6.12.92)|${ALL_SAFE}"
 
@@ -555,23 +557,27 @@ jobs:
           mkdir -p kernel_workspace
           cd kernel_workspace
 
+          # --- Changes made here ---------------------------------------------
+          # Removed `--no-tags` to allow git tracking mechanisms to fetch tags.
+          # -------------------------------------------------------------------
           retry_command repo init \
             -u https://android.googlesource.com/kernel/manifest \
             -b "common-${KERNEL_BRANCH}" \
             --depth=1 \
-            --no-clone-bundle \
-            --no-tags
+            --no-clone-bundle
 
           # --- Redirect a retired GKI branch to its deprecated/ head ----------
-          # Google periodically moves aged android16-6.12-YYYY-MM branches under
-          # refs/heads/deprecated/, but the manifest still pins the bare name, so
-          # `repo sync` dies with "couldn't find remote ref". If our target common
-          # branch is gone yet still exists under deprecated/, drop a local_manifest
-          # that redirects the kernel/common project there (survives repo's manifest
-          # refresh, unlike editing default.xml). Live branches skip this entirely,
-          # so devices on a current branch are unaffected.
+          # Modified to check if ${KERNEL_BRANCH} represents a tag instead of a branch.
+          # If it is a tag (contains '_r' or matches tag listing), we skip the deprecated 
+          # check completely since tags never migrate under heads/deprecated/.
           COMMON_URL="https://android.googlesource.com/kernel/common"
-          if ! git ls-remote --exit-code --heads "$COMMON_URL" "refs/heads/${KERNEL_BRANCH}" >/dev/null 2>&1 \
+          IS_TAG=false
+          if [[ "${KERNEL_BRANCH}" == *"_r"* ]] || git ls-remote --exit-code --tags "$COMMON_URL" "refs/tags/${KERNEL_BRANCH}" >/dev/null 2>&1; then
+            IS_TAG=true
+          fi
+
+          if [ "$IS_TAG" = false ] \
+             && ! git ls-remote --exit-code --heads "$COMMON_URL" "refs/heads/${KERNEL_BRANCH}" >/dev/null 2>&1 \
              && git ls-remote --exit-code --heads "$COMMON_URL" "refs/heads/deprecated/${KERNEL_BRANCH}" >/dev/null 2>&1; then
             echo "⚠️ kernel/common '${KERNEL_BRANCH}' retired upstream — redirecting to 'deprecated/${KERNEL_BRANCH}'"
             mkdir -p .repo/local_manifests
@@ -593,15 +599,17 @@ jobs:
 
           echo "🔄 Primary repo sync with -j${SYNC_JOBS}"
 
+          # --- Changes made here ---------------------------------------------
+          # Removed `--no-tags` to allow parsing explicit tag targets.
+          # Removed `--current-branch` which forces sync to crash when looking for tag heads.
+          # -------------------------------------------------------------------
           set +e
           repo sync \
             -c \
             -j"${SYNC_JOBS}" \
             --prune \
             --no-clone-bundle \
-            --no-tags \
             --force-sync \
-            --current-branch \
             --optimized-fetch \
             --retry-fetches=3
           SYNC_STATUS=$?
@@ -617,15 +625,16 @@ jobs:
               .repo/projects/prebuilts/clang/host/linux-x86.git \
               .repo/projects/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.17-4.8.git
 
+            # --- Changes made here -------------------------------------------
+            # Removed `--no-tags` and `--current-branch` flags from the fallback block.
+            # -----------------------------------------------------------------
             repo sync \
               -c \
               -j1 \
               --fail-fast \
               --prune \
               --no-clone-bundle \
-              --no-tags \
               --force-sync \
-              --current-branch \
               --optimized-fetch \
               --retry-fetches=3
           fi
@@ -638,6 +647,7 @@ jobs:
           rm -f common/android/abi_gki_protected_exports_* 2>/dev/null || true
 
           echo "DURATION_SYNC_GKI=$(($(date +%s) - STEP_START))s" >> "$GITHUB_ENV"
+
 
       - name: Kernel Version Handling
         shell: bash

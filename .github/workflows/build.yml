@@ -560,21 +560,30 @@ jobs:
           # --- Changes made here ---------------------------------------------
           # Removed `--no-tags` to allow git tracking mechanisms to fetch tags.
           # -------------------------------------------------------------------
-          retry_command repo init \
-            -u https://android.googlesource.com/kernel/manifest \
-            -b "common-${KERNEL_BRANCH}" \
-            --depth=1 \
-            --no-clone-bundle
+          IS_TAG=false
+          if [[ "${KERNEL_BRANCH}" == *"_r"* ]] || git ls-remote --exit-code --tags "$COMMON_URL" "refs/tags/${KERNEL_BRANCH}" >/dev/null 2>&1; then
+            IS_TAG=true
+          fi
+          if [ "$IS_TAG" = true ] then;
+            MANIFEST_BRANCH="$KERNEL_BRANCH%%_r*"
+            retry_command repo init \
+              -u https://android.googlesource.com/kernel/manifest \
+              -b "common-${MANIFEST_BRANCH}" \
+              --depth=1 \
+              --no-clone-bundle
+          else
+            retry_command repo init \
+              -u https://android.googlesource.com/kernel/manifest \
+              -b "common-${KERNEL_BRANCH}" \
+              --depth=1 \
+              --no-clone-bundle
+          fi
 
           # --- Redirect a retired GKI branch to its deprecated/ head ----------
           # Modified to check if ${KERNEL_BRANCH} represents a tag instead of a branch.
           # If it is a tag (contains '_r' or matches tag listing), we skip the deprecated 
           # check completely since tags never migrate under heads/deprecated/.
           COMMON_URL="https://android.googlesource.com/kernel/common"
-          IS_TAG=false
-          if [[ "${KERNEL_BRANCH}" == *"_r"* ]] || git ls-remote --exit-code --tags "$COMMON_URL" "refs/tags/${KERNEL_BRANCH}" >/dev/null 2>&1; then
-            IS_TAG=true
-          fi
 
           if [ "$IS_TAG" = false ] \
              && ! git ls-remote --exit-code --heads "$COMMON_URL" "refs/heads/${KERNEL_BRANCH}" >/dev/null 2>&1 \

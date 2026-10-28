@@ -566,7 +566,7 @@ jobs:
           fi
           
           if [ "$IS_TAG" = true ]; then
-            MANIFEST_BRANCH="$KERNEL_BRANCH%%_r*"
+            MANIFEST_BRANCH="android16-6.12-2026-03"
           else
             MANIFEST_BRANCH="$KERNEL_BRANCH"
           fi

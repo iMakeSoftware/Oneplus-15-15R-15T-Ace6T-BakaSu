@@ -161,7 +161,8 @@ so `uname -r` matches what the device shipped with:
 |---|---|
 | `android16-6.12-2025-06` | `6.12.23-android16-5-gb2a876903b49-ab14541642-4k` |
 | `android16-6.12-2025-09` | `6.12.38-android16-5-g844001fb8721-ab14552068-4k` |
-| `android16-6.12-2025-12` | `6.12.58-android16-6-g925a103d123c-ab15898589-4k` | `6.12.69-android16-6-g242e1a07f878-ab15865446-4k`
+| `android16-6.12-2025-12` | `6.12.58-android16-6-g925a103d123c-ab15898589-4k` | 
+| `android16-6.12-2026-03` | `6.12.69-android16-6-g242e1a07f878-ab15865446-4k` |
 
 Those three strings are OnePlus OEM build tails, so they only exist for releases
 an OTA has shipped. For any other release the suffix is synthesized instead:

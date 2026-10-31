@@ -768,6 +768,7 @@ jobs:
               android16-6.12-2025-06) STOCK_SUFFIX="5-gb2a876903b49-ab14541642-4k" ;;
               android16-6.12-2025-09) STOCK_SUFFIX="5-g844001fb8721-ab14552068-4k" ;;
               android16-6.12-2025-12) STOCK_SUFFIX="6-g925a103d123c-ab15898589-4k" ;;
+              android16-6.12-2026-03) STOCK_SUFFIX="6-g242e1a07f878-ab15865446-4k" ;;
               *) STOCK_SUFFIX="" ;;
             esac
 

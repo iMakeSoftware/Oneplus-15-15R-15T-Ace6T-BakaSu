@@ -29,6 +29,8 @@ It syncs Android GKI sources, adds **BakaSU**, optionally applies **SUSFS**, and
 > above is only the default. The September 2026 OTA moved OnePlus 15 and 15R to
 > **6.12.58 / android16-6** (a KMI generation bump), so pick
 > `android16-6.12-2025-12` if your firmware is on that OTA.
+> October 2026 OTA moved OnePlus Ace 6T / 15R to
+> **6.12.69 / android16-6** (a KMI generation bump for Ace 6T and Pre-September 2026 6.12.58 OTA (6.12.38) OnePlus 15R
 
 ### Selectable GKI releases
 
@@ -39,13 +41,11 @@ It syncs Android GKI sources, adds **BakaSU**, optionally applies **SUSFS**, and
 | `android16-6.12-2025-06` | 6.12.23 | 5 | OnePlus 15 / 15T launch firmware (retired upstream, auto-redirected to `deprecated/`) |
 | `android16-6.12-2025-09` | 6.12.38 | 5 | OnePlus 15R / Ace 6T launch firmware |
 | `android16-6.12-2025-12` | 6.12.58 | 6 | OnePlus 15 / 15T / 15R / Ace 6T / Pad 3 Pro / Pad 4 (Sept-2026 OTA, and Pad 3 Pro / Pad 4 out of the box) |
-| `android16-6.12-2026-03` | 6.12.69 | 6 | OnePlus 15 / 15T / 15R / Ace 6T / Pad 3 Pro / Pad 4 (no OnePlus OTA on this release yet) |
+| `android16-6.12-2026-03` | 6.12.69 | 6 | OnePlus 15 / 15T / 15R / Ace 6T / Pad 3 Pro / Pad 4 (OnePlus 15R/Ace 6T October OTA release) |
 | `android16-6.12-2026-06` | 6.12.81 | 6 | OnePlus 15 / 15T / 15R / Ace 6T / Pad 3 Pro / Pad 4 (no OnePlus OTA on this release yet) |
 | `android16-6.12-2026-09` | 6.12.92 | 6 | OnePlus 15 / 15T / 15R / Ace 6T / Pad 3 Pro / Pad 4 (no OnePlus OTA on this release yet) |
 
-> Anything past `2025-12` is a plain AOSP branch — KMI-6, so it boots on
-> post-OTA firmware, but no OnePlus build has ever shipped it.
->
+> Anything past `2025-12` is a plain AOSP branch (OnePlus OSS hasn't uploaded the source code for kernel newer than this yet) — KMI-6, Only OnePlus Ace 6T /15R October OTA (Android 17) has shipped with newer (`2026-03`) kernel >
 > Not offered: `2025-07` / `2025-08` (the manifest branch exists but Google
 > deleted the matching `kernel/common` ref, so `repo sync` cannot resolve it),
 > `2025-05-exp` (KMI 4), `-kminext` (KMI 7), the moving `-sp` / `-lts` tips and
@@ -76,6 +76,7 @@ and labels the ZIP accordingly.
 head: `r54` means `<selected release>_r54`, and a full `android16-6.12-2026-03_r54`
 also selects its release. The build fails if the tag does not exist or the sync
 lands anywhere else.
+To check revision used in stock Kernel check get Android build ID using uname -r on stock kernel e.g. 6.12.69-android16-6-g242e1a07f878-ab15865446-4k (Android 17 15R & Ace 6T), build ID is in 'ab' prefixed section "ab15865446" (build ID = 15865446) select your kernel version (e.g. 6.12) on 'https://source.android.com/docs/core/architecture/kernel/gki-release-builds' open the json formatted list and search build number to get matching tag (e.g. r54)
 ---
 
 ## ✨ Features
@@ -137,8 +138,7 @@ and stops doing so automatically once those symbols appear in the KSU tree.
 | Option | Description |
 |---|---|
 | `DEVICE` | Device to build, or `all` |
-| `GKI_RELEASE` | `auto` = the device default above, or pin any release from [Selectable GKI releases](#selectable-gki-releases) 
-|
+| `GKI_RELEASE` | `auto` = the device default above, or pin any release from [Selectable GKI releases](#selectable-gki-releases) |
 | `GKI_TAG` | Empty = branch head, `rNN` = that tag of the selected release, or a full `android16-6.12-YYYY-MM_rNN` tag |
 | `KSU_META` | BakaSU source: `branch/tag/commit`. Defaults to `sync-susfs` — see the SUSFS note above |
 | `SUSFS_META` | Empty = latest, `-1` = disabled, hash = pinned |
@@ -161,7 +161,7 @@ so `uname -r` matches what the device shipped with:
 |---|---|
 | `android16-6.12-2025-06` | `6.12.23-android16-5-gb2a876903b49-ab14541642-4k` |
 | `android16-6.12-2025-09` | `6.12.38-android16-5-g844001fb8721-ab14552068-4k` |
-| `android16-6.12-2025-12` | `6.12.58-android16-6-g925a103d123c-ab15898589-4k` |
+| `android16-6.12-2025-12` | `6.12.58-android16-6-g925a103d123c-ab15898589-4k` | `6.12.69-android16-6-g242e1a07f878-ab15865446-4k`
 
 Those three strings are OnePlus OEM build tails, so they only exist for releases
 an OTA has shipped. For any other release the suffix is synthesized instead:
